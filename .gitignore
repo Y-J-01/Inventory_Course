@@ -1,0 +1,19 @@
+# Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+*.sln
+*.VC.db
+*.VC.opendb
+*.log
+
+# Mac
+*.dSYM
