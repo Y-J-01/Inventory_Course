@@ -7,6 +7,7 @@
 #include "Items/Fragments/Inv_ItemFragment.h"
 #include "Types/Inv_GridTypes.h"
 #include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
+#include "GameplayTagContainer.h"
 #include "Inv_InventoryGrid.generated.h"
 
 class UInv_SlottedItem;
@@ -43,6 +44,10 @@ public:
 	void DropItem();
 	bool HasHoverItem() const;
 	UInv_HoverItem* GetHoverItem() const;
+	float GetTileSize() const { return TileSize; }
+	void ClearHoverItem();
+	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
+	void OnHide();
 	
 private:
 	
@@ -104,10 +109,10 @@ private:
 	FInv_TileParameters LastTileParameters;
 	int32 ItemDropIndex{INDEX_NONE};
 	FInv_SpaceQueryResult CurrecntQueryResult;
-	bool bMouseWithinCanvas;
-	bool bLastMouseWithinCanvas;
-	int32 LastHightlightedIndex;
-	FIntPoint LastHightlightedDimensions;
+	bool bMouseWithinCanvas{false};
+	bool bLastMouseWithinCanvas{false};
+	int32 LastHightlightedIndex{INDEX_NONE};
+	FIntPoint LastHightlightedDimensions{FIntPoint::ZeroValue};
 	
 	
 	void ConstructGrid();
@@ -116,8 +121,8 @@ private:
 	
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
 	
-	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
-	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item, const int32 StackAmountOverride = -1);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest, const int32 StackAmountOverride = -1);
 	
 	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
 	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment) const;
@@ -126,19 +131,22 @@ private:
 	void AddSlottedItemToCanvas(const int32 Index, const FInv_GridFragment* GridFragment, UInv_SlottedItem* SlottedItem) const;
 	void UpdateGridSlot(UInv_InventoryItem* NewItem, const int32 Index, bool bStackableItem, const int32 StackAmount);
 	bool IsIndexClaimed(const TSet<int32>& CheckedIndices, const int32 Index) const;
-	bool HasRoomAtIndex(const UInv_GridSlot* GridSlot, 
-		const FIntPoint& Dimensions,
-		const TSet<int32>& CheckedIndices,
-		TSet<int32> OutTentativelyClaimed,
-		const FGameplayTag& ItemType,
-		const int32 MaxStackSize);
+	bool HasRoomAtIndex(
+	const UInv_GridSlot* GridSlot,
+	const FIntPoint& Dimensions,
+	const TSet<int32>& CheckedIndices,
+	TSet<int32>& OutTentativelyClaimed,
+	const FGameplayTag& ItemType,
+	const int32 MaxStackSize
+);
 	FIntPoint GetItemDimensions(const FInv_ItemManifest& Manifest) const;
-	bool CheckSlotConstraints(const UInv_GridSlot* GridSlot, 
-		const UInv_GridSlot* SubGridSlot, 
-		const TSet<int32>& CheckedIndices, 
-		TSet<int32> OutTentativelyClaimed, 
-		const FGameplayTag& ItemType,
-		const int32 MaxStackSize) const;
+	bool CheckSlotConstraints(
+	const UInv_GridSlot* GridSlot,
+	const UInv_GridSlot* SubGridSlot,
+	const TSet<int32>& CheckedIndices,
+	TSet<int32>& OutTentativelyClaimed,
+	const FGameplayTag& ItemType,
+	const int32 MaxStackSize) const;
 	bool HasValidItem(const UInv_GridSlot* GridSlot) const;
 	bool IsUpperLeftSlot(const UInv_GridSlot* GridSlot, const UInv_GridSlot* SubGridSlot) const;
 	bool DoesItemTypeMatch(const UInv_InventoryItem* SubItem, const FGameplayTag& ItemType) const;
@@ -148,7 +156,6 @@ private:
 	bool IsRightClick(const FPointerEvent& MouseEvent) const;
 	bool IsLeftClick(const FPointerEvent& MouseEvent) const;
 	void PickUp(UInv_InventoryItem* ClickedInventoryItem, const int32 GridIndex);
-	void AssignHoverItem(UInv_InventoryItem* InventoryItem);
 	void AssignHoverItem(UInv_InventoryItem* InventoryItem, const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* InventoryItem, const int32 GridIndex);
 	void UpdateTileParameters(const FVector2D CanvasPosition, const FVector2D MousePosition);
@@ -162,7 +169,6 @@ private:
 	void UnHighlightSlots(const int32 Index, const FIntPoint& Dimensions);
 	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState GridSlotState);
 	void PutDownOnIndex(const int32 Index);
-	void ClearHoverItem();
 	UUserWidget* GetVisibleCursorWidget();
 	UUserWidget* GetHiddenCursorWidget();
 	bool IsSameStackable(const UInv_InventoryItem* ClickedInventoryItem) const;
@@ -174,6 +180,9 @@ private:
 	bool ShouldFillInStack(const int32 RoomInClickedSlot, const int32 HoveredStackCount ) const;
 	void FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index);
 	void CreateItemPopUp(const int32 GridIndex);
+	void ClearItemPopUp();
+	void PutHoverItemBack();
+	
 	
 	
 	
@@ -200,5 +209,8 @@ private:
 	
 	UFUNCTION()
 	void OnPopUpMenuConsume(int32 Index);
+	
+	UFUNCTION()
+	void OnInventoryMenuToggled(bool bOpen);
 	
 };

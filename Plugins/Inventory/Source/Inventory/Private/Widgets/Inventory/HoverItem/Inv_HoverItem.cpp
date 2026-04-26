@@ -30,11 +30,7 @@ void UInv_HoverItem::UpdateStackCount(const int32 Count)
 
 FGameplayTag UInv_HoverItem::GetItemType() const
 {
-	if (InventoryItem.IsValid())
-	{
-		return InventoryItem->GetItemManifest().GetItemType();
-	}
-	return FGameplayTag();
+	return ItemType;
 }
 
 void UInv_HoverItem::SetIsStackable(bool bStacks)
@@ -54,4 +50,13 @@ UInv_InventoryItem* UInv_HoverItem::GetInventoryItem() const
 void UInv_HoverItem::SetInventoryItem(UInv_InventoryItem* Item)
 {
 	InventoryItem = Item;
+
+	if (InventoryItem.IsValid())
+	{
+		ItemType = InventoryItem->GetItemManifest().GetItemType();
+	}
+	else
+	{
+		ItemType = FGameplayTag();
+	}
 }

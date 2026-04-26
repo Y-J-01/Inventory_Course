@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GameplayTags.h"
+#include "GameplayTagContainer.h"
 #include "Inv_HoverItem.generated.h"
 
 
@@ -35,6 +35,7 @@ public:
 	void SetGridDimensions(const FIntPoint& Dimensions) {GridDimensions = Dimensions; };
 	UInv_InventoryItem* GetInventoryItem() const;
 	void SetInventoryItem(UInv_InventoryItem* Item);
+	void SetItemType(const FGameplayTag& Type) { ItemType = Type; }
 	
 private:
 	
@@ -49,4 +50,5 @@ private:
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
 	bool bIsStackable{false};
 	int32 StackCount{0};
+	FGameplayTag ItemType;
 };

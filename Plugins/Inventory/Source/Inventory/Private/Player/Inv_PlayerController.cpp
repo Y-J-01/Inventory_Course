@@ -26,28 +26,31 @@ void AInv_PlayerController::Tick(float DeltaTime)
 
 void AInv_PlayerController::ToggleInventory()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ToggleInventory called. InventoryComponent=%s"),
-		*GetNameSafe(InventoryComponent.Get()));
 	
 	if (!InventoryComponent.IsValid()) return;
 	
 	InventoryComponent->ToggleInventoryMenu();
+	
+	if (InventoryComponent->IsMenuOpen())
+	{
+		HUDWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		HUDWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
 }
 
 void AInv_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	UE_LOG(LogTemp, Warning, TEXT("PlayerController BeginPlay START"));
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	UE_LOG(LogTemp, Warning, TEXT("EnhancedInput Subsystem = %s"), *GetNameSafe(Subsystem));
 	
 	if (IsValid(Subsystem))
 	{
 		for (UInputMappingContext* CurrentContext : DefaultIMCs)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Adding Mapping Context: %s"), *GetNameSafe(CurrentContext));
 			Subsystem->AddMappingContext(CurrentContext, 0);
 		}
 	}
@@ -55,26 +58,13 @@ void AInv_PlayerController::BeginPlay()
 	InventoryComponent = FindComponentByClass<UInv_InventoryComponent>();
 	
 	CreateHUDWidget();
-	
-	UE_LOG(LogTemp, Warning, TEXT("PlayerController BeginPlay"));
-	UE_LOG(LogTemp, Warning, TEXT("Controller InventoryComponent = %s"), *GetNameSafe(FindComponentByClass<UInv_InventoryComponent>()));
-	UE_LOG(LogTemp, Warning, TEXT("Stored InventoryComponent = %s"), *GetNameSafe(InventoryComponent.Get()));
-	UE_LOG(LogTemp, Warning, TEXT("Pawn = %s"), *GetNameSafe(GetPawn()));
-	UE_LOG(LogTemp, Warning, TEXT("HUDWidget = %s"), *GetNameSafe(HUDWidget));
-	UE_LOG(LogTemp, Warning, TEXT("PlayerController BeginPlay END"));
 }
 
 void AInv_PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	
-	UE_LOG(LogTemp, Warning, TEXT("SetupInputComponent called. InputComponent=%s"),
-		*GetNameSafe(InputComponent));
-	
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
-	UE_LOG(LogTemp, Warning, TEXT("EnhancedInputComponent=%s"), *GetNameSafe(EnhancedInputComponent));
-	UE_LOG(LogTemp, Warning, TEXT("PrimaryInputAction=%s"), *GetNameSafe(PrimaryInputAction));
-	UE_LOG(LogTemp, Warning, TEXT("ToggleInventorytAction=%s"), *GetNameSafe(ToggleInventorytAction));
 	
 	EnhancedInputComponent->BindAction(PrimaryInputAction, ETriggerEvent::Started, this, &AInv_PlayerController::PrimaryInteract);
 	EnhancedInputComponent->BindAction(ToggleInventorytAction, ETriggerEvent::Started, this, &AInv_PlayerController::ToggleInventory);
@@ -82,58 +72,37 @@ void AInv_PlayerController::SetupInputComponent()
 
 void AInv_PlayerController::PrimaryInteract()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract START. ThisActor=%s InventoryComponent=%s"),
-		*GetNameSafe(ThisActor.Get()),
-		*GetNameSafe(InventoryComponent.Get()));
 	
 	if (!ThisActor.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract EXIT: ThisActor invalid"));
 		return;
 	}
 	
 	UInv_ItemComponent* ItemComp = ThisActor->FindComponentByClass<UInv_ItemComponent>();
-	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract ItemComp=%s"), *GetNameSafe(ItemComp));
 	
 	if (!IsValid(ItemComp))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract EXIT: ItemComp invalid"));
 		return;
 	}
 	
 	if (!InventoryComponent.IsValid())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract EXIT: InventoryComponent invalid"));
 		return;
 	}
 	 
 	InventoryComponent->TryAddItem(ItemComp);
 	
-	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract END. ThisActor=%s InventoryComponent=%s"),
-		*GetNameSafe(ThisActor.Get()),
-		*GetNameSafe(InventoryComponent.Get()));
 }
 
 void AInv_PlayerController::CreateHUDWidget()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CreateHUDWidget called. IsLocalController=%d HUDWidgetClass=%s"),
-		IsLocalController() ? 1 : 0,
-		*GetNameSafe(HUDWidgetClass));
-	
 	if (!IsLocalController()) return;
-	
 	HUDWidget = CreateWidget<UInv_HUDWidget>(this, HUDWidgetClass);
-	UE_LOG(LogTemp, Warning, TEXT("CreateHUDWidget created HUDWidget=%s"), *GetNameSafe(HUDWidget));
-	
 	if (IsValid(HUDWidget))
 	{
 		HUDWidget->AddToViewport();
-		UE_LOG(LogTemp, Warning, TEXT("HUDWidget added to viewport"));
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("CreateHUDWidget FAILED: HUDWidget invalid"));
-	}
+	
 }
 
 void AInv_PlayerController::TraceForItem()

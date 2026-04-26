@@ -192,3 +192,60 @@ struct FInv_ManaPotionFragment : public FInv_ConsumableModifier
 	virtual void OnConsume(APlayerController* PC) override;
 	
 };
+
+USTRUCT(BlueprintType)
+struct FInv_EquipModifier : public FInv_LabeledNumberFragment
+{
+	GENERATED_BODY()
+	
+	virtual void OnEquip(APlayerController* PC) {}
+	virtual void OnUnEquip(APlayerController* PC) {}
+	
+};
+
+USTRUCT(BlueprintType)
+struct FInv_StrengthModifier : public FInv_EquipModifier
+{
+	GENERATED_BODY()
+	
+	virtual void OnEquip(APlayerController* PC) override;
+	virtual void OnUnEquip(APlayerController* PC) override;
+	
+};
+
+class AInv_EquipActor;
+USTRUCT(BlueprintType)
+struct FInv_EquipmentFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+	
+	bool bEquipped{false};
+	void OnEquip(APlayerController* PC);
+	void OnUnEquip(APlayerController* PC);
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	virtual void Manifest() override;
+	
+	AInv_EquipActor* SpawnAttachedActor(USkeletalMeshComponent* AttachMesh) const;
+	void DestroyAttachedActor() const;
+	FGameplayTag GetEquipmentType() const { return EquipmentType; }
+	void SetEquippedActor(AInv_EquipActor* EquipActor);
+	
+private:
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TArray<TInstancedStruct<FInv_EquipModifier>> EquipModifiers;
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	TSubclassOf<AInv_EquipActor> EquipActorClass = nullptr;
+	
+	TWeakObjectPtr<AInv_EquipActor> EquippedActor = nullptr;
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FName SocketAttachPoint{NAME_None};
+	
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FGameplayTag EquipmentType = FGameplayTag::EmptyTag;
+	
+};
+
+

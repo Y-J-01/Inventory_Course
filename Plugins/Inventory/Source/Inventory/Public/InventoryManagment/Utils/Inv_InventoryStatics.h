@@ -39,6 +39,8 @@ class INVENTORY_API UInv_InventoryStatics : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	static UInv_HoverItem* GetHoverItem(APlayerController* PC);
 	
+	static UInv_InventoryBase* GetInventoryWidget(APlayerController* PC);
+	
 };
 
 template<typename T, typename FuncT>

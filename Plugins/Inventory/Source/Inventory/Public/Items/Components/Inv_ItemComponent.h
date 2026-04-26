@@ -19,8 +19,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void InitItemManifest(FInv_ItemManifest CopyOfManifest);
-	
 	FInv_ItemManifest GetItemManifest() const {return ItemManifest;}
+	FInv_ItemManifest& GetItemManifestMutable()  {return ItemManifest;}
 	FString GetPickUpMessage() const {return PickUpMessage;}
 	void PickedUp();
 
