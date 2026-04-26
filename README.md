@@ -94,13 +94,6 @@ Used to modularly define behavior:
 
 ---
 
-## Status
-
-Work in progress 🚧  
-Core systems are functional, currently improving stability and expanding features.
-
----
-
 ## Author
 
-Yegor
+Yehor 
